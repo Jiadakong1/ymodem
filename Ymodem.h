@@ -9,8 +9,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#define TRUE 0
-#define FALSE 1
+#define FALSE  -1
+#define TRUE   0
 #define FR_OK  0
 
 /*********************************************************************
@@ -50,7 +50,7 @@
  * TYPE_DEFS
  */
 typedef unsigned char uint8;
-FILE *pFile;
+int fd;
 /*********************************************************************
  * FUNCTIONS
  *********************************************************************/
