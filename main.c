@@ -6,22 +6,50 @@ int main(int argc, char const *argv[]) {
     printf("main:\n");
     uart_start();   //如果文件不初始化，
 
-    //__putchar( 'C' );
+    __putchar( 'C' );
     //__getbuf(buf, 1);
     //lseek(fd,0L,SEEK_SET);
-    printf("getbuf:\n");
     //tcflush(fd,TCIFLUSH);
-    __getbuf(buf, 1);
-    printf("end getbuf:\n");
-    for(i=0; i<13; i++){
-        printf("buf[%d] = %c   ", i, buf[i] );
-    }
-    printf("\nend\n");
+    __getbuf(buf, 133);
 
-    // __putchar( ACK );
-    // __putchar( 'C' );
-    // __getbuf(buf, 133);
-    // __putchar( ACK );
+    printf("print buf1:\n");
+    for(i=0; i<133; i++){
+        printf("%c   ", buf[i] );
+    }
+    printf("\nreceive end\n");
+
+    __putchar( ACK );
+    __putchar( 'C' );
+     __getbuf(buf, 133);
+     printf("print buf:\n");
+     for(i=0; i<133; i++){
+         printf("%c   ", buf[i] );
+     }
+     printf("\nreceive end\n");
+
+
+    __putchar( ACK );
+    __getbuf(buf, 1);
+    printf("print eot:\n");
+    printf("%c   ", buf[0] );
+    printf("\nreceive end\n");
+
+
+    __putchar( NAK );
+    __getbuf(buf, 1);
+    printf("print eot:\n");
+    printf("%c   ", buf[0] );
+    printf("\nreceive end\n");
+
+    __putchar( ACK );
+    __putchar( 'C' );
+     __getbuf(buf, 133);
+     printf("print buf:\n");
+     for(i=0; i<133; i++){
+         printf("%c   ", buf[i] );
+     }
+     printf("\nreceive end\n");
+     __putchar( ACK );
     // __getbuf(buf, 133);
     // __putchar( NAK);
     // __getbuf(buf, 133);

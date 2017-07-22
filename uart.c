@@ -29,19 +29,19 @@ void set_speed(int fd, int speed){
        int   i;
        int   status;
        struct termios   Opt;
-       tcgetattr(fd, &Opt);  //得到设备对应的termios，保存到opt
+       tcgetattr(fd, &Opt);  //得到设备对应的termios，保存到opt,修改opt，再写回。
        for ( i= 0;  i < sizeof(speed_arr) / sizeof(int);  i++) {
-                 if  (speed == name_arr[i]) {
-                          tcflush(fd, TCIOFLUSH);
-                          cfsetispeed(&Opt, speed_arr[i]);  //改变opt中表示输入速度元素的值
-                          cfsetospeed(&Opt, speed_arr[i]);
-                          status = tcsetattr(fd, TCSANOW, &Opt);  //根据opt设置设备termios值
-                          if  (status != 0) {
-                                   perror("tcsetattr fd");
-                                   return;
-                          }
-                          tcflush(fd,TCIOFLUSH);
-                 }
+             if  (speed == name_arr[i]) {
+                  tcflush(fd, TCIOFLUSH);
+                  cfsetispeed(&Opt, speed_arr[i]);  //改变opt中表示输入速度元素的值
+                  cfsetospeed(&Opt, speed_arr[i]);
+                  status = tcsetattr(fd, TCSANOW, &Opt);  //根据opt设置设备termios值
+                  if  (status != 0) {
+                           perror("tcsetattr fd");
+                           return;
+                  }
+                  tcflush(fd,TCIOFLUSH);
+             }
        }
 }
   /**
@@ -53,81 +53,81 @@ void set_speed(int fd, int speed){
   */
 int set_Parity(int fd,int databits,int stopbits,int parity)
 {
-       struct termios options;
-       if  ( tcgetattr( fd,&options)  !=  0) {
-                 perror("SetupSerial 1");
-                 return(FALSE);
-       }
-       options.c_cflag &= ~CSIZE;
-       options.c_lflag  &= ~(ICANON | ECHO | ECHOE | ISIG);  /*Input*///设置为普通模式，当串口作为中断时，设置为标准模式
-       options.c_oflag  &= ~OPOST;   /*Output*/
+   struct termios options;
+   if  ( tcgetattr( fd,&options)  !=  0) {
+             perror("SetupSerial 1");
+             return(FALSE);
+   }
+   options.c_cflag &= ~CSIZE;
+   options.c_lflag  &= ~(ICANON | ECHO | ECHOE | ISIG);  /*Input*///设置为普通模式，当串口作为中断时，设置为标准模式
+   options.c_oflag  &= ~OPOST;   /*Output*/
 
-       //options.c_iflag &= ~ (IXON | IXOFF | IXANY);//自己加的，屏蔽软件流控
+   //options.c_iflag &= ~ (IXON | IXOFF | IXANY);//自己加的，屏蔽软件流控
 
-       switch (databits) /*设置数据位数*/
-       {
-           case 7:
-                     options.c_cflag |= CS7;
-                     break;
-           case 8:
-                     options.c_cflag |= CS8;
-                     break;
-           default:
-                     fprintf(stderr,"Unsupported data size/n"); return (FALSE);
-       }
-
-      switch (parity)
-      {
-           case 'n':
-           case 'N':
-                 options.c_cflag &= ~PARENB;   /* Clear parity enable */
-                 options.c_iflag &= ~INPCK;     /* Enable parity checking */
+   switch (databits) /*设置数据位数*/
+   {
+       case 7:
+                 options.c_cflag |= CS7;
                  break;
-           case 'o':
-           case 'O':
-                     options.c_cflag |= (PARODD | PARENB); /* 设置为奇效验*/
-                     options.c_iflag |= INPCK;             /* Disnable parity checking */
-                     break;
-           case 'e':
-           case 'E':
-                     options.c_cflag |= PARENB;     /* Enable parity */
-                     options.c_cflag &= ~PARODD;   /* 转换为偶效验*/
-                     options.c_iflag |= INPCK;       /* Disnable parity checking */
-                     break;
-           case 'S':
-           case 's':  /*as no parity*/
-               options.c_cflag &= ~PARENB;
-                     options.c_cflag &= ~CSTOPB;break;
-           default:
-                     fprintf(stderr,"Unsupported parity/n");
-                     return (FALSE);
-       }
-      /* 设置停止位*/
-      switch (stopbits)
-      {
-               case 1:
-                         options.c_cflag &= ~CSTOPB;
-                         break;
-               case 2:
-                         options.c_cflag |= CSTOPB;
-                         break;
-               default:
-                          fprintf(stderr,"Unsupported stop bits/n");
-                          return (FALSE);
-      }
-      /* Set input parity option */
-      if (parity != 'n')
-               options.c_iflag |= INPCK;
-      tcflush(fd,TCIFLUSH);
-      options.c_cc[VTIME] = 0; /* 设置超时15 seconds*/
-      options.c_cc[VMIN] = 1;//13; /* define the minimum bytes data to be readed*/
+       case 8:
+                 options.c_cflag |= CS8;
+                 break;
+       default:
+                 fprintf(stderr,"Unsupported data size/n"); return (FALSE);
+   }
 
-      if (tcsetattr(fd,TCSANOW,&options) != 0)
-      {
-               perror("SetupSerial 3");
-               return (FALSE);
-      }
-      return (TRUE);
+  switch (parity)
+  {
+       case 'n':
+       case 'N':
+             options.c_cflag &= ~PARENB;   /* Clear parity enable */
+             options.c_iflag &= ~INPCK;     /* Enable parity checking */
+             break;
+       case 'o':
+       case 'O':
+                 options.c_cflag |= (PARODD | PARENB); /* 设置为奇效验*/
+                 options.c_iflag |= INPCK;             /* Disnable parity checking */
+                 break;
+       case 'e':
+       case 'E':
+                 options.c_cflag |= PARENB;     /* Enable parity */
+                 options.c_cflag &= ~PARODD;   /* 转换为偶效验*/
+                 options.c_iflag |= INPCK;       /* Disnable parity checking */
+                 break;
+       case 'S':
+       case 's':  /*as no parity*/
+           options.c_cflag &= ~PARENB;
+                 options.c_cflag &= ~CSTOPB;break;
+       default:
+                 fprintf(stderr,"Unsupported parity/n");
+                 return (FALSE);
+   }
+  /* 设置停止位*/
+  switch (stopbits)
+  {
+           case 1:
+                     options.c_cflag &= ~CSTOPB;
+                     break;
+           case 2:
+                     options.c_cflag |= CSTOPB;
+                     break;
+           default:
+                      fprintf(stderr,"Unsupported stop bits/n");
+                      return (FALSE);
+  }
+  /* Set input parity option */
+  if ((parity != 'n') && (parity != 'N'))
+           options.c_iflag |= INPCK;
+  tcflush(fd,TCIFLUSH);
+  options.c_cc[VTIME] = 0; /* 设置超时15 seconds*/
+  options.c_cc[VMIN] = 1;//13; /* define the minimum bytes data to be readed*/
+
+  if (tcsetattr(fd,TCSANOW,&options) != 0)
+  {
+           perror("SetupSerial 3");
+           return (FALSE);
+  }
+  return (TRUE);
 }
   /**********************************************************************
   代码说明：使用串口一测试的，发送的数据是字符，
@@ -137,7 +137,7 @@ int set_Parity(int fd,int databits,int stopbits,int parity)
   /*********************************************************************/
 
 void uart_start(){
-    fd = open( "/dev/ttyS3", O_RDWR | O_NOCTTY | O_NDELAY); //注意：红板是/dev/ttyPS1  蓝板是/dev/ttyS1
+    fd = open( "/dev/ttyS1", O_RDWR | O_NOCTTY | O_NDELAY); //注意：红板是/dev/ttyPS1  蓝板是/dev/ttyS1
 
     if (-1 == fd)
     {
@@ -173,7 +173,6 @@ void  __getbuf(char* buf, size_t len){
     int nread = 0;
     int be_left = len;
 
-    printf("before read:\n");
     while(1){
         //usleep(5000);
         nread = read(fd, &buf[len-be_left], be_left);
@@ -182,7 +181,9 @@ void  __getbuf(char* buf, size_t len){
         if(be_left == 0)
            break;
     }
-    printf("end read\n");
+    printf("%d\n", (int)buf[0]);
+    printf("%d\n", (int)buf[1]);
+    printf("%d\n", (int)buf[2]);
 }
 
 
@@ -190,8 +191,6 @@ void __putchar( char ch ){
   char ch1 = ch;
   int len =0;
   len = write(fd, &ch1, sizeof(char));
-  //write(&ch1, sizeof(char), sizeof(char) , fd );
-  printf("putchar: len = %d\n", len);
 }
 
 
