@@ -63,8 +63,8 @@ int set_Parity(int fd,int databits,int stopbits,int parity)
    options.c_lflag  &= ~(ICANON | ECHO | ECHOE | ISIG);  /*Input*///设置为普通模式，当串口作为中断时，设置为标准模式
    options.c_oflag  &= ~OPOST;   /*Output*/
 
-   options.c_iflag &= ~ (IXON | IXOFF | IXANY);//自己加的，屏蔽软件流控  如果不屏蔽，0x11接收不到
-
+   //options.c_iflag &= ~ (IXON | IXOFF| BRKINT | ISTRIP  | IXANY | ICRNL | IGNCR);//自己加的，屏蔽软件流控  如果不屏蔽，0x11接收不到
+   options.c_iflag &= ~( IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
    switch (databits) /*设置数据位数*/
    {
        case 7:
@@ -180,9 +180,9 @@ int   __getbuf(char* buf, size_t len){
         nread = read(fd, &buf[len-be_left], be_left);
         if(nread > 0){
             time_count = PACKET_TIMEOUT;//设置超时时间
-            for(i=len-be_left; i<len-be_left+nread; i++){//打印已经接收的数据
-                printf("%x ", buf[i]);
-            }
+            // for(i=len-be_left; i<len-be_left+nread; i++){//打印已经接收的数据
+            //     printf("%x ", buf[i]);
+            // }
             be_left = be_left - nread;
         }
         else{

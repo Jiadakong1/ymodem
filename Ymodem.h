@@ -63,6 +63,7 @@ void packet_reception(char * buf);
 void  file_open(void);
 void file_close(void);
 void write_buf_to_file(char *buf, size_t seek, size_t len);
+void bin_file_0_to_255(void);
 
 
 

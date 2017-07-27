@@ -85,6 +85,29 @@ unsigned short crc16(const unsigned char *buf, unsigned long count)
   return crc;
 }
 
+// unsigned short crc16(const unsigned char *buf, unsigned long count)
+// {
+//   unsigned short crc = 0;
+//   int i;
+//
+//   while(count--) {
+//     crc = crc ^ *buf++ << 8;
+//
+//     for (i=0; i<8; i++) {
+//       if (crc & 0x8000) {
+//         crc = crc << 1 ^ 0x1021;
+//       } else {
+//         crc = crc << 1;
+//       }
+//     }
+//   }
+//   return crc;
+// }
+//
+
+
+
+
 
 void packet_processing(char *buf){
     int i = 0;
@@ -157,14 +180,14 @@ void packet_processing(char *buf){
                 case STX:
                     //packet_size = (size_t)(buf[0])==SOH? PACKET_SIZE:PACKET_1K_SIZE;
                     crc1 = crc16( (unsigned char*)(buf+3), packet_size );
-                    crc2 = ((unsigned short)(buf[packet_total_length-2]))*256+buf[packet_total_length-1];
+                    crc2 = ((unsigned short)(buf[packet_total_length-2]))*256+(unsigned short)buf[packet_total_length-1];
                     if( crc1 != crc2){
                         printf("crc wrong!\n");
                         exit(0);
                     }
 
                     write_buf_to_file( buf+3, seek, packet_size );  //将接收的包保存
-                    //seek += packet_size;
+                    seek += packet_size;
                     __putchar( ACK );
                     printf("YMODEM_RX_ACK: send ACK!\n" );
                     break;
@@ -287,6 +310,7 @@ void packet_reception(char * buf){
 int main(int argc, char const *argv[]) {
     char buf[1029] = {'0'};
     int i = 0;
+
     printf("main:\n");
     uart_start();   //如果文件不初始化，
     file_open();

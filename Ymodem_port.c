@@ -39,7 +39,20 @@ void write_buf_to_file(char *buf, size_t seek, size_t len){
 }
 
 
+void bin_file_0_to_255(void){
+    int i = 0;
+    if( (fdst = fopen("bin_file_0_to_255.bin", "wb") ) == NULL){
+        printf("file open wrong!\n");
+    }else{
+        printf("file open right!\n");
+    }
+    for(i = 0; i<=255; i++){
+        fputc(i, fdst);
+    }
+    fclose(fdst);
+    printf("file close right!\n");
 
+}
 
 
 
