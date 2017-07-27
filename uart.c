@@ -23,7 +23,8 @@ int speed_arr[] = { B115200, B38400, B19200, B9600, B4800, B2400, B1200, B300,
 int name_arr[] = {115200, 38400,  19200,   9600,  4800,  2400,  1200,  300,
                   115200, 38400,  19200,   9600,  4800,  2400,  1200,  300, };
 
-
+unsigned int time_out = FALSE;
+static int time_count = 100000;
 
 void set_speed(int fd, int speed){
        int   i;
@@ -62,7 +63,7 @@ int set_Parity(int fd,int databits,int stopbits,int parity)
    options.c_lflag  &= ~(ICANON | ECHO | ECHOE | ISIG);  /*Input*///设置为普通模式，当串口作为中断时，设置为标准模式
    options.c_oflag  &= ~OPOST;   /*Output*/
 
-   //options.c_iflag &= ~ (IXON | IXOFF | IXANY);//自己加的，屏蔽软件流控
+   options.c_iflag &= ~ (IXON | IXOFF | IXANY);//自己加的，屏蔽软件流控  如果不屏蔽，0x11接收不到
 
    switch (databits) /*设置数据位数*/
    {
@@ -120,7 +121,7 @@ int set_Parity(int fd,int databits,int stopbits,int parity)
            options.c_iflag |= INPCK;
   tcflush(fd,TCIFLUSH);
   options.c_cc[VTIME] = 0; /* 设置超时15 seconds*/
-  options.c_cc[VMIN] = 1;//13; /* define the minimum bytes data to be readed*/
+  options.c_cc[VMIN] = 0;//13; /* define the minimum bytes data to be readed*/
 
   if (tcsetattr(fd,TCSANOW,&options) != 0)
   {
@@ -161,36 +162,52 @@ void uart_end(){
 
 
 
-char __getchar(){
-    char ch = '0';
-    read(fd, &ch, sizeof(char));
-    //flush;
-    //sync;
-    return ch;
-}
+// char __getchar(){
+//     char ch = '0';
+//     read(fd, &ch, sizeof(char));
+//     //flush;
+//     //sync;
+//     return ch;
+// }
 
-void  __getbuf(char* buf, size_t len){
+int   __getbuf(char* buf, size_t len){
     int nread = 0;
     int be_left = len;
-
+    int i = 0;
+    printf("\n__getbuf:  data\n");
     while(1){
         //usleep(5000);
         nread = read(fd, &buf[len-be_left], be_left);
-        if(nread > 0)
-           be_left = be_left - nread;
+        if(nread > 0){
+            time_count = 2000000;//设置超时时间
+            // for(i=len-be_left; i<len-be_left+nread; i++){//打印已经接收的数据
+            //     printf("%x ", buf[i]);
+            // }
+            be_left = be_left - nread;
+        }
+        else{
+            //超时
+            time_count--;
+            if(time_count == 0){
+                time_out == TRUE;
+                printf("time out !      len = %d\t be_left = %d\n", len, be_left);
+            }
+        }
         if(be_left == 0)
            break;
     }
-    printf("%d\n", (int)buf[0]);
-    printf("%d\n", (int)buf[1]);
-    printf("%d\n", (int)buf[2]);
+    printf("\n");
+    return len - be_left;
+
 }
 
 
 void __putchar( char ch ){
   char ch1 = ch;
   int len =0;
-  len = write(fd, &ch1, sizeof(char));
+  while( write(fd, &ch1, sizeof(char)) <= 0){
+      printf("write wrong!\n");
+  }
 }
 
 

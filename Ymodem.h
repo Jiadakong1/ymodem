@@ -51,9 +51,26 @@
  */
 typedef unsigned char uint8;
 int fd;
+unsigned int time_out;
 /*********************************************************************
  * FUNCTIONS
  *********************************************************************/
+int packet_check(char *buf, int len);
+int packet_if_empty( char *buf, int len);
+void packet_processing(char *buf);
+void packet_reception(char * buf);
+void  file_open(void);
+void file_close(void);
+void write_buf_to_file(char *buf, size_t seek, size_t len);
+
+
+
+
+
+
+
+
+
 //*注：接收——只有ymodem_rx_start()是接收到消息的时候调用，其它都是用户实现，ymodem自动调用
 //*注：发送——用户调用ymodem_tx_header()只有ymodem_tx_start()是接收到消息的时候调用，其它都是用户实现，ymodem自动调用
 void ymodem_rx_put( char *buf, size_t rx_sz );
@@ -61,16 +78,16 @@ void ymodem_rx_put( char *buf, size_t rx_sz );
 //必须实现的函数
    //上层函数
    //接收函数
-uint8 ymodem_rx_header( char* fil_nm, size_t fil_sz );          //当检测到包头的时候，自动调用此函数（打开文件）
-uint8 ymodem_rx_finish( uint8 status );                         //返回结束原因，成功还是出错（关闭文件）
-uint8 ymodem_rx_pac_get( char *buf, size_t offset, size_t size );//(写文件)
+// uint8 ymodem_rx_header( char* fil_nm, size_t fil_sz );          //当检测到包头的时候，自动调用此函数（打开文件）
+// uint8 ymodem_rx_finish( uint8 status );                         //返回结束原因，成功还是出错（关闭文件）
+// uint8 ymodem_rx_pac_get( char *buf, size_t offset, size_t size );//(写文件)
 
  //底层函数
 void uart_start();
 void uart_end();
 
 char __getchar();
-void __getbuf(char* buf, size_t len);
+int __getbuf(char* buf, size_t len);
 
 void __putchar( char ch );
 void __putbuf( char* buf, size_t len );
