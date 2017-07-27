@@ -9,12 +9,14 @@ static  size_t fil_rx_sz;
 static  char   *fil_tx_nm;      //传输的文件名称
 //static  size_t fil_tx_sz;       //传输的文件大小
   //接收
-void  file_open(void)
+void  file_open(char *file_name)
 {
-    if( (fdst = fopen("receive.txt", "w") ) == NULL){
+    if( (fdst = fopen(file_name, "w") ) == NULL){
         printf("file open wrong!\n");
     }else{
         printf("file open right!\n");
+        printf("file_name = %s\n",file_name );
+        //while(1);
     }
     return;
 }

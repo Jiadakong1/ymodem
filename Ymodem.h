@@ -63,7 +63,7 @@ int packet_check(char *buf, int len);
 int packet_if_empty( char *buf, int len);
 void packet_processing(char *buf);
 void packet_reception(char * buf);
-void  file_open(void);
+void  file_open(char *file_name);
 void file_close(void);
 void write_buf_to_file(char *buf, size_t seek, size_t len);
 void bin_file_0_to_255(void);

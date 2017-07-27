@@ -1,4 +1,4 @@
 #!/bin/bash
 make clean
 make
-scp -r ../ymodem root@10.10.1.49:~
+scp receive root@10.10.1.49:~/ymodem/

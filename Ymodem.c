@@ -271,3 +271,15 @@
 //       break;
 //   }
 // }
+//
+// void  file_open(char *file_name)
+// {
+//     if( (fdst = fopen(file_name, "w") ) == NULL){
+//         printf("file open wrong!\n");
+//     }else{
+//         printf("file open right!\n");
+//         printf("file_name = %s\n",file_name );
+//         //while(1);
+//     }
+//     return;
+// }

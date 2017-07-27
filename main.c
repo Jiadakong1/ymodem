@@ -112,7 +112,6 @@ void packet_processing(char *buf){
                     {
                         __putchar( ACK );
                         printf("00000\n");
-
                         //__putchar( 0x4f);//xshell结束使用  crt不用
                         receive_status = YMODEM_RX_EXIT;
                         goto receive_exit;                  //这是在本循环必须完成的操作，所以需要用到 goto 语句
@@ -125,6 +124,8 @@ void packet_processing(char *buf){
                             __putchar( ACK );
                             seek = 0;      //初始化变量，用于接收新文件
                             __putchar( 'C' );
+
+                            file_open(&buf[3]);  //根据第一包中的文件名创建文件
                             receive_status = YMODEM_RX_ACK;
                         }
                         else{
@@ -195,7 +196,11 @@ void packet_processing(char *buf){
                     //ymodem_rx_finish( YMODEM_OK );        //确认发送完毕，保存文件
                     //start_receive = TRUE;
                     receive_status = YMODEM_RX_IDLE;
+                    file_close();    //文件接收完毕，完毕文件
                     __putchar( ACK );
+
+
+
                     __putchar( 'C' );
                     printf("receive 2nd EOT:\n" );
                     break;
@@ -211,7 +216,7 @@ void packet_processing(char *buf){
         //在YMODEM_RX_IDLE状态下收到全0数据包
 receive_exit:
         case YMODEM_RX_EXIT:
-            printf("receive_exit\n");
+            printf("receive_exit: YMODEM_RX_EXIT\n");
             receive_status = YMODEM_RX_IDLE;
             end_receive = TRUE;
             return;
@@ -281,7 +286,7 @@ int main(int argc, char const *argv[]) {
     int i = 0;
 
     uart_start();   //如果文件不初始化，
-    file_open();
+
 
     printf("start:\n");
     while(1) {
@@ -292,7 +297,7 @@ int main(int argc, char const *argv[]) {
         packet_reception(buf);
     }
 
-    file_close();
+
     uart_end();
     return 0;
 }
