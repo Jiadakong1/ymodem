@@ -25,6 +25,7 @@ int name_arr[] = { 460800, 230400,115200, 38400,  19200,   9600,  4800,  2400,  
 
 unsigned int time_out = FALSE;
 unsigned int time_count = PACKET_TIMEOUT;
+unsigned int time_out_count = 0;
 
 void set_speed(int fd, int speed){
        int   i;
@@ -180,9 +181,9 @@ int   __getbuf(char* buf, size_t len){
         nread = read(fd, &buf[len-be_left], be_left);
         if(nread > 0){
             time_count = PACKET_TIMEOUT;//设置超时时间
-            // for(i=len-be_left; i<len-be_left+nread; i++){//打印已经接收的数据
-            //     printf("%x ", buf[i]);
-            // }
+            for(i=len-be_left; i<len-be_left+nread; i++){//打印已经接收的数据
+                printf("%x ", buf[i]);
+            }
             be_left = be_left - nread;
         }
         else{
@@ -191,7 +192,9 @@ int   __getbuf(char* buf, size_t len){
             if(time_count <= 0){
                 time_out = TRUE;
                 printf("time out !      len = %d\t be_left = %d\n", len, be_left);
-                //exit(1);
+                time_out_count++;
+                if(time_out_count >= MAX_TIMEOUT_NUM)
+                    exit(1);
                 break;
             }
         }

@@ -30,7 +30,7 @@ int packet_check(char *buf, int len){
     //指令包
     if(len <= 1){
         if( ch==EOT || ch==ACK || ch==NAK || ch==CAN || ch==CNC ){
-            printf("packet_check: %d\n", (int)ch );
+            //printf("packet_check: %d\n", (int)ch );
             return (int)ch;
 
         }
@@ -41,7 +41,7 @@ int packet_check(char *buf, int len){
     else{
         if( ch==SOH || ch==STX ){
             //数据包校验
-            printf("packet_check: %d\n", (int)ch );
+            //printf("packet_check: %d\n", (int)ch );
             return (int)ch;
         }
         else
@@ -56,9 +56,9 @@ int packet_if_empty( char *buf, int len)
     int offset=0;
     while( ((buf[offset]==0x20)||(buf[offset]==0x30) || (buf[offset]==0x00)) &&  ++offset<len);
     if( offset == len ){
-        printf("是全0：\n");
+        printf("是全0\n");
         return TRUE;
-        printf("不是全0：\n");
+        printf("不是全0\n");
     }
     else
     return FALSE;
@@ -85,30 +85,6 @@ unsigned short crc16(const unsigned char *buf, unsigned long count)
   return crc;
 }
 
-// unsigned short crc16(const unsigned char *buf, unsigned long count)
-// {
-//   unsigned short crc = 0;
-//   int i;
-//
-//   while(count--) {
-//     crc = crc ^ *buf++ << 8;
-//
-//     for (i=0; i<8; i++) {
-//       if (crc & 0x8000) {
-//         crc = crc << 1 ^ 0x1021;
-//       } else {
-//         crc = crc << 1;
-//       }
-//     }
-//   }
-//   return crc;
-// }
-//
-
-
-
-
-
 void packet_processing(char *buf){
     int i = 0;
     unsigned short crc1 = 0;
@@ -120,7 +96,7 @@ void packet_processing(char *buf){
         __putchar('C');
         return;
     }
-    printf("start_receive = %d\n", (int)start_receive);
+    //printf("start_receive = %d\n", (int)start_receive);
     printf("status = %d\n", (int)receive_status);
     //根据接收的状态进行处理
     switch (receive_status) {
@@ -135,18 +111,15 @@ void packet_processing(char *buf){
                     if( TRUE == packet_if_empty( &buf[3], packet_size ) )   //判断是否是空包
                     {
                         __putchar( ACK );
-                        printf("00000：\n");
+                        printf("00000\n");
+
+                        //__putchar( 0x4f);//xshell结束使用  crt不用
                         receive_status = YMODEM_RX_EXIT;
                         goto receive_exit;                  //这是在本循环必须完成的操作，所以需要用到 goto 语句
                     }
                     else    //如果不是空包，则认为是第一个包（包含文件名和文件大小）
                     {
-                        printf("11111：\n");
-                        // for (i = 0; i < 128; i++) {
-                        //     printf("%c\t",buf[3+i] );
-                        // }
-                        // printf("\n");
-
+                        printf("first packet!\n");
                         if( (packet_size==128)  || (packet_size==1024))//CRT第一个包为1024
                         {
                             __putchar( ACK );
@@ -189,7 +162,6 @@ void packet_processing(char *buf){
                     write_buf_to_file( buf+3, seek, packet_size );  //将接收的包保存
                     seek += packet_size;
                     __putchar( ACK );
-                    printf("YMODEM_RX_ACK: send ACK!\n" );
                     break;
 
 
@@ -206,7 +178,8 @@ void packet_processing(char *buf){
                     break;
                 default:
                   //__putchar( NAK );      //不正常的状态，调试用
-        //          goto err;           //这儿暂时认为，包有误，就重发
+                  receive_status = YMODEM_RX_ERR;
+                  goto err;           //这儿暂时认为，包有误，就重发
                   printf("YMODEM_RX_ACK: default!\n" );
                   break;
             }
@@ -236,21 +209,24 @@ void packet_processing(char *buf){
 
 
         //在YMODEM_RX_IDLE状态下收到全0数据包
-receive_exit:   case YMODEM_RX_EXIT:
+receive_exit:
+        case YMODEM_RX_EXIT:
             printf("receive_exit\n");
             receive_status = YMODEM_RX_IDLE;
             end_receive = TRUE;
             return;
 
         //错误状态
-err:    case YMODEM_RX_ERR:
+err:
+        case YMODEM_RX_ERR:
             printf("error!\n");
             receive_status = YMODEM_RX_IDLE;
             end_receive = TRUE;
             break;
 
         default:
-            break;
+            printf("wrong!\n");
+            exit(1);
     }
 
 }
@@ -296,13 +272,6 @@ void packet_reception(char * buf){
         //packet_type = PACKET_INSTRUCTION;
         packet_total_length = 1;
     }
-
-    // printf("\ndata:\n");
-    // for (i = 0; i < packet_total_length; i++) {
-    //     printf("%x ", buf[i]);
-    // }
-    // printf("\n\n");
-
     start_receive = FALSE;
 }
 
@@ -311,7 +280,6 @@ int main(int argc, char const *argv[]) {
     char buf[1029] = {'0'};
     int i = 0;
 
-    printf("main:\n");
     uart_start();   //如果文件不初始化，
     file_open();
 
@@ -320,15 +288,11 @@ int main(int argc, char const *argv[]) {
         packet_processing(buf);
         if(end_receive == TRUE)
             break;
-
         //printf("\n\n\n\nreceive data:\t");
         packet_reception(buf);
-
     }
 
     file_close();
     uart_end();
-
-
     return 0;
 }
