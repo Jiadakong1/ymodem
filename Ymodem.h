@@ -24,7 +24,7 @@
 #define PACKET_OVERHEAD         (PACKET_HEADER + PACKET_TRAILER)
 #define PACKET_SIZE             (128)
 #define PACKET_1K_SIZE          (1024)
-#define PACKET_TIMEOUT          (1)
+#define PACKET_TIMEOUT          (2000000)
 
 #define INITIAL
 
@@ -52,6 +52,7 @@
 typedef unsigned char uint8;
 int fd;
 unsigned int time_out;
+unsigned int time_count;
 /*********************************************************************
  * FUNCTIONS
  *********************************************************************/

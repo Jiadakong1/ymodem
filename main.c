@@ -1,4 +1,5 @@
 #include "Ymodem.h"
+#include <stdlib.h>     /*标准函数库定义*/
 
 //
 // #define PACKET_SIZE    128
@@ -64,10 +65,35 @@ int packet_if_empty( char *buf, int len)
 }
 
 
+
+unsigned short crc16(const unsigned char *buf, unsigned long count)
+{
+  unsigned short crc = 0;
+  int i;
+
+  while(count--) {
+    crc = crc ^ *buf++ << 8;
+
+    for (i=0; i<8; i++) {
+      if (crc & 0x8000) {
+        crc = crc << 1 ^ 0x1021;
+      } else {
+        crc = crc << 1;
+      }
+    }
+  }
+  return crc;
+}
+
+
 void packet_processing(char *buf){
     int i = 0;
+    unsigned short crc1 = 0;
+    unsigned short crc2 = 0;
     //如果buf长度是0，那么发送字符c
     if( TRUE == start_receive){
+        time_out = FALSE;   //开始新一次计时
+        time_count = PACKET_TIMEOUT;
         __putchar('C');
         return;
     }
@@ -82,16 +108,13 @@ void packet_processing(char *buf){
                 case SOH:
                 case STX:
                     printf("data packet:\t");
-                    packet_size = (size_t)(buf[0])==SOH ? PACKET_SIZE : PACKET_1K_SIZE;
+                    //packet_size = (size_t)(buf[0])==SOH ? PACKET_SIZE : PACKET_1K_SIZE;
                     if( TRUE == packet_if_empty( &buf[3], packet_size ) )   //判断是否是空包
                     {
-                        //__putchar( ACK );
-                        __putchar( CAN );
+                        __putchar( ACK );
                         printf("00000：\n");
-
-                        //__putchar( ACK );
                         receive_status = YMODEM_RX_EXIT;
-                        goto exit;                  //这是在本循环必须完成的操作，所以需要用到 goto 语句
+                        goto receive_exit;                  //这是在本循环必须完成的操作，所以需要用到 goto 语句
                     }
                     else    //如果不是空包，则认为是第一个包（包含文件名和文件大小）
                     {
@@ -132,23 +155,32 @@ void packet_processing(char *buf){
             switch (packet_check( buf, packet_total_length)) {
                 case SOH:
                 case STX:
-                  //packet_size = (size_t)(buf[0])==SOH? PACKET_SIZE:PACKET_1K_SIZE;
-                  write_buf_to_file( buf+3, seek, packet_size );  //将接收的包保存
-                  //seek += packet_size;
-                  __putchar( ACK );
-                  printf("YMODEM_RX_ACK: send ACK!\n" );
-                  break;
-                  //指令包
+                    //packet_size = (size_t)(buf[0])==SOH? PACKET_SIZE:PACKET_1K_SIZE;
+                    crc1 = crc16( (unsigned char*)(buf+3), packet_size );
+                    crc2 = ((unsigned short)(buf[packet_total_length-2]))*256+buf[packet_total_length-1];
+                    if( crc1 != crc2){
+                        printf("crc wrong!\n");
+                        exit(0);
+                    }
+
+                    write_buf_to_file( buf+3, seek, packet_size );  //将接收的包保存
+                    //seek += packet_size;
+                    __putchar( ACK );
+                    printf("YMODEM_RX_ACK: send ACK!\n" );
+                    break;
+
+
+                //指令包
                 case EOT:
-                  __putchar( NAK );
-                  printf("YMODEM_RX_ACK: send NAK!\n" );
-                  receive_status = YMODEM_RX_EOT;
-                  break;
+                    __putchar( NAK );
+                    printf("YMODEM_RX_ACK: send NAK!\n" );
+                    receive_status = YMODEM_RX_EOT;
+                    break;
                 case CAN:
-                  receive_status = YMODEM_RX_ERR;
-                  printf("YMODEM_RX_ACK: recieve CAN!\n" );
-                  goto err;
-                  break;
+                    receive_status = YMODEM_RX_ERR;
+                    printf("YMODEM_RX_ACK: recieve CAN!\n" );
+                    goto err;
+                    break;
                 default:
                   //__putchar( NAK );      //不正常的状态，调试用
         //          goto err;           //这儿暂时认为，包有误，就重发
@@ -181,8 +213,8 @@ void packet_processing(char *buf){
 
 
         //在YMODEM_RX_IDLE状态下收到全0数据包
-exit:   case YMODEM_RX_EXIT:
-            printf("exit\n");
+receive_exit:   case YMODEM_RX_EXIT:
+            printf("receive_exit\n");
             receive_status = YMODEM_RX_IDLE;
             end_receive = TRUE;
             return;
@@ -206,7 +238,7 @@ void packet_reception(char * buf){
 
     //得到第一个字
     __getbuf(buf, 1);
-    if(time_out = TRUE){   //超时要返回
+    if(time_out == TRUE){   //超时要返回
         return;
     }
 

@@ -18,13 +18,13 @@ extern int fd;
 *@param  speed  类型 int  串口速度
 *@return  void
 */
-int speed_arr[] = { B115200, B38400, B19200, B9600, B4800, B2400, B1200, B300,
-                    B115200, B38400, B19200, B9600, B4800, B2400, B1200, B300, };
-int name_arr[] = {115200, 38400,  19200,   9600,  4800,  2400,  1200,  300,
-                  115200, 38400,  19200,   9600,  4800,  2400,  1200,  300, };
+int speed_arr[] = { B460800,B230400,B115200, B38400, B19200, B9600, B4800, B2400, B1200, B300,
+                    B460800,B230400,B115200, B38400, B19200, B9600, B4800, B2400, B1200, B300, };
+int name_arr[] = { 460800, 230400,115200, 38400,  19200,   9600,  4800,  2400,  1200,  300,
+                   460800, 230400,115200, 38400,  19200,   9600,  4800,  2400,  1200,  300, };
 
 unsigned int time_out = FALSE;
-static int time_count = 100000;
+unsigned int time_count = PACKET_TIMEOUT;
 
 void set_speed(int fd, int speed){
        int   i;
@@ -179,18 +179,20 @@ int   __getbuf(char* buf, size_t len){
         //usleep(5000);
         nread = read(fd, &buf[len-be_left], be_left);
         if(nread > 0){
-            time_count = 2000000;//设置超时时间
-            // for(i=len-be_left; i<len-be_left+nread; i++){//打印已经接收的数据
-            //     printf("%x ", buf[i]);
-            // }
+            time_count = PACKET_TIMEOUT;//设置超时时间
+            for(i=len-be_left; i<len-be_left+nread; i++){//打印已经接收的数据
+                printf("%x ", buf[i]);
+            }
             be_left = be_left - nread;
         }
         else{
             //超时
             time_count--;
-            if(time_count == 0){
-                time_out == TRUE;
+            if(time_count <= 0){
+                time_out = TRUE;
                 printf("time out !      len = %d\t be_left = %d\n", len, be_left);
+                //exit(1);
+                break;
             }
         }
         if(be_left == 0)
