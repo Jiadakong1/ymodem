@@ -27,8 +27,8 @@
 #define PACKET_OVERHEAD         (PACKET_HEADER + PACKET_TRAILER)
 #define PACKET_SIZE             (128)
 #define PACKET_1K_SIZE          (1024)
-#define PACKET_TIMEOUT          (400000)
-#define MAX_TIMEOUT_NUM         (46)
+#define PACKET_TIMEOUT          (800000)   //超时时间
+#define MAX_TIMEOUT_NUM         (40)       //最大超时次数
 
 
 #define INITIAL

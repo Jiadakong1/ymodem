@@ -18,10 +18,8 @@ int fd = 0;
 *@param  speed  类型 int  串口速度
 *@return  void
 */
-int speed_arr[] = { B460800,B230400,B115200, B38400, B19200, B9600, B4800, B2400, B1200, B300,
-                    B460800,B230400,B115200, B38400, B19200, B9600, B4800, B2400, B1200, B300, };
-int name_arr[] = { 460800, 230400,115200, 38400,  19200,   9600,  4800,  2400,  1200,  300,
-                   460800, 230400,115200, 38400,  19200,   9600,  4800,  2400,  1200,  300, };
+int speed_arr[] = { B460800,B230400,B115200, B38400, B19200, B9600, B4800, B2400, B1200, B300, };
+int name_arr[] = { 460800, 230400,115200, 38400,  19200,   9600,  4800,  2400,  1200,  300, };
 
 unsigned int time_out = FALSE;
 unsigned int time_count = PACKET_TIMEOUT;
@@ -153,7 +151,7 @@ void uart_start()
     }
     else
     {
-        set_speed(fd, 115200);  //设置为115200有问题，不设置也有问题
+        set_speed(fd, 230400);  //设置为115200有问题，不设置也有问题
         if (set_Parity(fd,8,1,'N') == FALSE)
         {
             printf("Set Parity Error/n");
@@ -192,10 +190,10 @@ int   __getbuf(char* buf, size_t len)
         if(nread > 0)
         {
             time_count = PACKET_TIMEOUT;//设置超时时间
-            for(i=len-be_left; i<len-be_left+nread; i++)//打印已经接收的数据
-            {
-                printf("%x ", buf[i]);     //%x以16进制显示
-            }
+            // for(i=len-be_left; i<len-be_left+nread; i++)//打印已经接收的数据
+            // {
+            //     printf("%x ", buf[i]);     //%x以16进制显示
+            // }
             be_left = be_left - nread;
         }
         else

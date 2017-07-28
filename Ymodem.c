@@ -44,9 +44,9 @@ static int packet_if_empty( char *buf, int len)
     while( ((buf[offset]==0x20)||(buf[offset]==0x30) || (buf[offset]==0x00)) &&  ++offset<len);
     if( offset == len )
     {
-        printf("是全0\n");
+        printf("0 packet!\n");
         return TRUE;
-        printf("不是全0\n");
+        printf("not 0 packet!\n");
     }
     else
     return FALSE;
@@ -114,11 +114,9 @@ void packet_processing(char *buf){
             {
                 case SOH:
                 case STX:
-                    printf("data packet:\t");
                     if( TRUE == packet_if_empty( buf+3, packet_size ) )   //判断是否是空包
                     {
                         __putchar( ACK );
-                        printf("00000\n");
                         //__putchar( 0x4f);//xshell结束使用  crt不用
                         receive_status = YMODEM_RX_EXIT;
                         goto receive_exit;                      //这是在本循环必须完成的操作，所以需要用到 goto 语句
