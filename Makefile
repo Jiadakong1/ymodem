@@ -1,10 +1,10 @@
-receive:main.o Ymodem.o uart.o Ymodem_port.o
-	arm-linux-gnueabihf-gcc main.o Ymodem.o uart.o Ymodem_port.o -o receive -g
+receive:main.o Ymodem.o uart.o save_data.o
+	arm-linux-gnueabihf-gcc main.o Ymodem.o uart.o save_data.o -o receive -g
 
-Ymodem_port.o:Ymodem_port.c  Ymodem.h
-	arm-linux-gnueabihf-gcc -c Ymodem_port.c -g
+save_data.o:save_data.c  Ymodem.h
+	arm-linux-gnueabihf-gcc -c save_data.c -g
 
-Ymodem.o:Ymodem.c Ymodem.h Ymodem_port.o
+Ymodem.o:Ymodem.c Ymodem.h save_data.o
 	arm-linux-gnueabihf-gcc -c Ymodem.c -g
 
 main.o:main.c  Ymodem.h Ymodem.o

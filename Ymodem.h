@@ -8,6 +8,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <stdlib.h>
+#include <string.h>
+
 
 #define FALSE  -1
 #define TRUE   0
@@ -33,9 +36,13 @@
 #define FILE_NAME_LENGTH (64)
 #define FILE_SIZE_LENGTH (16)
 
-#define YMODEM_OK               0
-#define YMODEM_ERR              1       //校验包是否有问题，只能是“YMODEM_ERR==”而不应该“YMODEM_OK!=”
-#define YMODEM_PAC_EMPTY        2       //包校验正确，但是里面是空值，在（IDLE状态，判断是否需要结束，退出）
+
+#define YMODEM_RX_IDLE          0
+#define YMODEM_RX_ACK           1
+#define YMODEM_RX_EOT           2
+#define YMODEM_RX_ERR           3
+#define YMODEM_RX_EXIT          4
+
 /* ASCII control codes: */
 #define SOH (0x01)      /* start of 128-byte data packet */
 #define STX (0x02)      /* start of 1024-byte data packet */
@@ -45,55 +52,39 @@
 #define CAN (0x18)      /* two of these in succession aborts transfer */
 #define CNC (0x43)      /* character 'C' */
 
-/* Number of consecutive receive errors before giving up: */
-#define MAX_ERRORS    (5)
-
-/*********************************************************************
- * TYPE_DEFS
- */
 typedef unsigned char uint8;
-int fd;
-unsigned int time_out;
-unsigned int time_count;
-unsigned int time_out_count;
+
+extern int fd;
+extern unsigned int time_out;
+extern unsigned int time_count;
+extern unsigned int time_out_count;
+
+extern uint8 receive_status;
+extern size_t packet_size;
+extern size_t seek;
+extern size_t packet_total_length;
+extern int file_name_len;
+extern unsigned long file_size;
+extern int start_receive;
+extern int end_receive;
+
+
 /*********************************************************************
  * FUNCTIONS
  *********************************************************************/
-int packet_check(char *buf, int len);
-int packet_if_empty( char *buf, int len);
-void packet_processing(char *buf);
-void packet_reception(char * buf);
-void  file_open(char *file_name);
-void file_close(void);
-void write_buf_to_file(char *buf, size_t seek, size_t len);
-void bin_file_0_to_255(void);
 
-
-
-
-
-
-
-
-
-//*注：接收——只有ymodem_rx_start()是接收到消息的时候调用，其它都是用户实现，ymodem自动调用
-//*注：发送——用户调用ymodem_tx_header()只有ymodem_tx_start()是接收到消息的时候调用，其它都是用户实现，ymodem自动调用
-void ymodem_rx_put( char *buf, size_t rx_sz );
-
-//必须实现的函数
-   //上层函数
-   //接收函数
-// uint8 ymodem_rx_header( char* fil_nm, size_t fil_sz );          //当检测到包头的时候，自动调用此函数（打开文件）
-// uint8 ymodem_rx_finish( uint8 status );                         //返回结束原因，成功还是出错（关闭文件）
-// uint8 ymodem_rx_pac_get( char *buf, size_t offset, size_t size );//(写文件)
+extern void packet_processing(char *buf);
+extern void packet_reception(char * buf);
+extern void  file_open(char *file_name);
+extern void file_close(void);
+extern void write_buf_to_file(char *buf, size_t seek, size_t len);
+//extern void bin_file_0_to_255(void);   //测试所有字符用
 
  //底层函数
-void uart_start();
-void uart_end();
+extern void uart_start();
+extern void uart_end();
 
-char __getchar();
-int __getbuf(char* buf, size_t len);
+extern int __getbuf(char* buf, size_t len);
+extern void __putchar( char ch );
 
-void __putchar( char ch );
-void __putbuf( char* buf, size_t len );
 #endif    //_M_YMODEM_H
