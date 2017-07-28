@@ -151,7 +151,7 @@ void uart_start()
     }
     else
     {
-        set_speed(fd, 230400);  //设置为115200有问题，不设置也有问题
+        set_speed(fd, 115200);  //设置为115200有问题，不设置也有问题
         if (set_Parity(fd,8,1,'N') == FALSE)
         {
             printf("Set Parity Error/n");
