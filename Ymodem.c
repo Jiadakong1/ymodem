@@ -11,7 +11,6 @@ int start_receive = TRUE;
 int end_receive = FALSE;
 
 
-
 static int packet_check(char *buf, int len)
 {
     char ch = buf[0];
@@ -41,7 +40,7 @@ static int packet_check(char *buf, int len)
 static int packet_if_empty( char *buf, int len)
 {
     int offset=0;
-    while( ((buf[offset]==0x20)||(buf[offset]==0x30) || (buf[offset]==0x00)) &&  ++offset<len);
+    while( ((buf[offset]==0x20)||(buf[offset]==0x30) || (buf[offset]==0x00)) &&  ++offset<len); //CRT结尾并不都是0x1a，注意
     if( offset == len )
     {
         printf("0 packet!\n");
@@ -76,7 +75,7 @@ static unsigned short crc16(const unsigned char *buf, unsigned long count)
     return crc;
 }
 
-static unsigned long str_to_u32(char* str)
+unsigned long str_to_u32(const char* str)
 {
     const char *s = str;
     unsigned long len;
@@ -191,7 +190,7 @@ void packet_processing(char *buf){
             {
                 //指令包
                 case EOT:
-                    printf("receive 2nd EOT:\n" );
+                    //printf("receive 2nd EOT:\n" );
                     receive_status = YMODEM_RX_IDLE;
                     file_close();                               //文件接收完毕，关闭文件
                     __putchar( ACK );

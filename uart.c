@@ -11,6 +11,7 @@
 #include <termios.h>    /*PPSIX 终端控制定义*/
 #include <errno.h>      /*错误号定义*/
 
+unsigned int baud_rate = 115200;
 int fd = 0;
 /**
 *@brief  设置串口通信速率
@@ -143,7 +144,7 @@ int set_Parity(int fd,int databits,int stopbits,int parity)
 
 void uart_start()
 {
-    fd = open( "/dev/ttyS1", O_RDWR | O_NOCTTY | O_NDELAY); //注意：红板是/dev/ttyPS1  蓝板是/dev/ttyS1
+    fd = open( "/dev/ttyS1", O_RDWR | O_NOCTTY | O_NDELAY); //注意：红板是/dev/ttyPS0  蓝板是/dev/ttyS1
 
     if (-1 == fd)
     {
@@ -151,7 +152,7 @@ void uart_start()
     }
     else
     {
-        set_speed(fd, 115200);  //设置为115200有问题，不设置也有问题
+        set_speed(fd, baud_rate);
         if (set_Parity(fd,8,1,'N') == FALSE)
         {
             printf("Set Parity Error/n");
@@ -162,7 +163,25 @@ void uart_start()
 
 void uart_end()
 {
-    fcntl(fd,F_SETFL,0);//阻塞
+    //还原串口设置
+    // struct termios options;
+    // //fcntl(fd,F_SETFL,0);//阻塞
+    // if  ( tcgetattr( fd,&options)  !=  0)
+    // {
+    //      perror("SetupSerial 1");
+    // }
+    // options.c_cflag |= CSIZE;  //设置为正要用或非，设置为负要用与非
+    // options.c_lflag  |= ICANON | ECHO | ECHOE | ISIG;  /*Input*///设置为普通模式，当串口作为中断时，设置为标准模式
+    // options.c_oflag  |= OPOST;   /*Output*/
+    //
+    // //options.c_iflag &= ~ (IXON | IXOFF| BRKINT | ISTRIP  | IXANY | ICRNL | IGNCR);//自己加的，屏蔽软件流控  如果不屏蔽，0x11接收不到
+    // options.c_iflag |=   ICRNL | IXON;
+    //
+    // if (tcsetattr(fd,TCSANOW,&options) != 0)
+    // {
+    //     perror("SetupSerial 3");
+    // }
+
     close(fd);
     printf("uart close right!\n");
 }
@@ -203,10 +222,13 @@ int   __getbuf(char* buf, size_t len)
             if(time_count <= 0)
             {
                 time_out = TRUE;
-                printf("time out !      len = %d\t be_left = %d\n", len, be_left);
+                //printf("time out !      len = %d\t be_left = %d\n", len, be_left);
                 time_out_count++;
                 if(time_out_count >= MAX_TIMEOUT_NUM)
+                {
+                    printf("time out !\n");
                     exit(1);
+                }
                 break;
             }
         }

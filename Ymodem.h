@@ -67,12 +67,12 @@ extern int file_name_len;
 extern unsigned long file_size;
 extern int start_receive;
 extern int end_receive;
-
+extern unsigned int baud_rate;
 
 /*********************************************************************
  * FUNCTIONS
  *********************************************************************/
-
+extern unsigned long str_to_u32(const char* str);
 extern void packet_processing(char *buf);
 extern void packet_reception(char * buf);
 extern void  file_open(char *file_name);
