@@ -235,6 +235,6 @@ int   __getbuf(char* buf, size_t len)
         if(be_left == 0)
            break;
     }
-    printf("\n");
+    //printf("\n");
     return len - be_left;
 }

@@ -265,7 +265,7 @@ void packet_reception(char * buf)
     {
         packet_total_length = 1;
     }
-    printf("packet_total_length = %d\n", packet_total_length );
+    //printf("packet_total_length = %d\n", packet_total_length );
 
     start_receive = FALSE;
 }

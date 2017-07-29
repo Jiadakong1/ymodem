@@ -4,7 +4,8 @@ int main(int argc, char const *argv[])
 {
     char buf[1029] = {'0'};
     int i = 0;
-    baud_rate = (unsigned int)str_to_u32(argv[1]);
+    if(argv[1] != NULL)
+        baud_rate = (unsigned int)str_to_u32(argv[1]);
     uart_start();   //如果文件不初始化，
 
     printf("start:\n");
