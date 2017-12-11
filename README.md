@@ -35,8 +35,3 @@ fd = open( "/dev/<font color=#ff0000 size=4s>ttyS?</font>", O_RDWR | O_NOCTTY | 
 解决办法： 一次只传一个文件，接收到一个文件后就退出程序。
 
 
-<!-- 注释 -->
-![深鉴科技](http://img02.chrstatic.com/images/photo/201607/1468397924850ifqj3m.jpg)
-
-
-![深鉴科技](http://cdn6.haitou.cc/company/album/2016/09/19/70671-14742482816977_sm.jpg)
