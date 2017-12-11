@@ -1,8 +1,4 @@
 
-<font color=#0099ff size=4>deephi</font>
-
-<font color=#0099ff size=4>jiadakong</font>
-
 
 
 ## 板卡配置
